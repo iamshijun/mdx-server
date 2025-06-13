@@ -1,7 +1,8 @@
-# -*- coding: utf-8 -*-
-# version: python 2.7
+if sys.version_info < (3, 0, 0):
+    from pattern.en import lemma
+else:
+    pass
 
-from pattern.en import lemma
 import sys
 
 if __name__=="__main__":

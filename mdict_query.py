@@ -43,12 +43,12 @@ class IndexBuilder(object):
         assert(_file_extension == '.mdx')
         assert(os.path.isfile(fname))
         self._mdx_db = _filename + ".mdx.db"
+        self._mdd_file = _filename + ".mdd"
+        self._mdd_db = _filename + ".mdd.db"
         # make index anyway
         if force_rebuild:
             self._make_mdx_index(self._mdx_db)
             if os.path.isfile(_filename + '.mdd'):
-                self._mdd_file = _filename + ".mdd"
-                self._mdd_db = _filename + ".mdd.db"
                 self._make_mdd_index(self._mdd_db)
 
         if os.path.isfile(self._mdx_db):
@@ -102,8 +102,6 @@ class IndexBuilder(object):
             self._make_mdx_index(self._mdx_db)
 
         if os.path.isfile(_filename + ".mdd"):
-            self._mdd_file = _filename + ".mdd"
-            self._mdd_db = _filename + ".mdd.db"
             if not os.path.isfile(self._mdd_db):
                 self._make_mdd_index(self._mdd_db)
         pass
@@ -312,6 +310,8 @@ class IndexBuilder(object):
         return lookup_result_list
 	
     def mdd_lookup(self, keyword):
+        if not os.path.isfile(self._mdd_db):
+            return
         conn = sqlite3.connect(self._mdd_db)
         cursor = conn.execute("SELECT * FROM MDX_INDEX WHERE key_text = " + "\"" + keyword + "\"")
         lookup_result_list = []
@@ -347,17 +347,21 @@ class IndexBuilder(object):
         conn.close()
         return keys
 
-    def get_mdx_keys(self, query = ''):
+    def get_mdx_keys(self, query = '',max_results = 0):
         conn = sqlite3.connect(self._mdx_db)
+        limit = ""
+        if max_results > 0:
+            limit = " limit " + str(max_results)
+        
         if query:
             if '*' in query:
                 query = query.replace('*','%')
             else:
                 query = query + '%'
-            cursor = conn.execute('SELECT key_text FROM MDX_INDEX WHERE key_text LIKE \"' + query + '\"')
+            cursor = conn.execute('SELECT key_text FROM MDX_INDEX WHERE key_text LIKE \"' + query + '\"' + limit)
             keys = [item[0] for item in cursor]
         else:
-            cursor = conn.execute('SELECT key_text FROM MDX_INDEX')
+            cursor = conn.execute('SELECT key_text FROM MDX_INDEX' + limit)
             keys = [item[0] for item in cursor]
         conn.close()
         return keys
