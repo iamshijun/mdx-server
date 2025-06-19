@@ -2,6 +2,12 @@
 [[dicts]]
 name="小学館デジタル大辞泉"
 path="/Users/iamshijun/Library/Eudb_en_free/DJS.mdx"
+style_class="djs-dict"
+style="""
+    span[data-name="用例"] {
+        display: block;
+    } 
+"""
 
 [[dicts]]
 name="明鏡国語辞典［第三版］"

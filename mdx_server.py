@@ -48,6 +48,7 @@ resource_path = os.path.join(base_path, 'mdx')
 print("resouce path : " + resource_path)
 builder = None
 builders = {}
+dict_processor={}
 
 def get_url_map():
     result = {}
@@ -81,10 +82,11 @@ def application(environ, start_response):
     word = ''
     if m is not None:
         word = m.groups()[0]
-
+    print('search word:',word)
+    
     url_map = get_url_map()
     get_params = parse_qs(query_string)
-    print("url_map:",url_map)
+    #print("url_map:",url_map)
 
     if path_info in url_map:
         url_file = url_map[path_info]
@@ -100,11 +102,12 @@ def application(environ, start_response):
     else:
         start_response('200 OK', headers + [('Content-Type', 'text/html; charset=utf-8')])
        
-        if 'dict' in get_params: #选择查询单个词典的        
+        if 'dict' in get_params: #选择查询单个词典的    
             dict_name = get_params['dict'][0]
+            print('use dict:',dict_name,dict_name in builders)    
             if dict_name in builders:
                 index_builder = builders[dict_name]
-                return get_definition_mdx(path_info, index_builder)
+                return get_definition_mdx(word, index_builder)
             else:
                 return [b'<h1>Dict not found</h1>']
         # 列出所有词典的结果 
@@ -132,7 +135,12 @@ def _get_common_style():
      # fixme 暂时 先这样写死 
     # 给 meaning，exg style给 "小学館デジタル大辞泉"的 ,exmaple标签在 明鏡国語辞典
     return """<style>
-        span[data-name="用例"], span[data-name="語義"], span[data-name="語義G"], span[data-name="解説部"], example {
+        span[data-name="用例"],
+        span[data-name="語義"], 
+        span[data-name="語義G"], 
+        span[data-name="解説部"],
+        span[data-name="準大語義num"],
+        example {
             display: block;
         }        
         .example {
@@ -141,7 +149,7 @@ def _get_common_style():
         meaning ,exg, maccentaudiog {
             display: block;
         }
-        .meaning {
+        .meaning , span[data-name="用例"]{
             margin: 7px 0;
         }
         
@@ -153,6 +161,9 @@ def _get_common_style():
             margin-right: 7px;
         }
         div[class="unit-example"] {
+            margin: 7px 0;
+        }
+        div[class="unit-example"] p {
             display:inline;
         }
         span[class="example-source"]::after {
@@ -192,11 +203,12 @@ def loop():
     httpd.serve_forever()
 
 class MyDict :
-    def __init__(self,path:str,dict_name:str = None):
+    def __init__(self,path:str,dict_name:str = None,style_class:str = None):
         self.path = path
         if dict_name is None:
             dict_name = os.path.basename(path).replace('.mdx','').replace('.mdd','')
         self.dict_name = dict_name
+        self.style_class = style_class
         if not os.path.exists(path):
             raise FileNotFoundError(f"MDX/MDD file {path} not exist")
     

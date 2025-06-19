@@ -15,7 +15,7 @@ def get_definition_mdx(word, builder:IndexBuilder):
     #     fp.close()
     #     print("lemma: " + word)
     #     content = builder.mdx_lookup(word)
-        
+
     if len(content) == 0:
         fuzzy_words = builder.get_mdx_keys(word,1) # 根据前缀模糊找第一个    
         if len(fuzzy_words) > 0:
@@ -27,10 +27,17 @@ def get_definition_mdx(word, builder:IndexBuilder):
     
     pattern = re.compile(r"@@@LINK=(.*)")
     #print("found content: " + str(content))
-    rst = pattern.match(content[0])
-    if rst is not None:
-        link = rst.group(1).strip()
-        content = builder.mdx_lookup(link)
+    
+    for i, c in enumerate(content):
+        rst = pattern.match(c)
+        if rst is not None:
+            link = rst.group(1).strip()
+            new_c = builder.mdx_lookup(link)
+            if new_c is not None and len(new_c) > 0:
+                content[i] = new_c[0] #暂时只取第一个
+            else:
+                content[i] = new_c
+    
     str_content = ""
     if len(content) > 0:
         for c in content:
