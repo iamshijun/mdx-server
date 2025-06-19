@@ -221,7 +221,10 @@ if __name__ == '__main__':
 
     dicts:list[MyDict] = []
     if len(args.filenames) < 1: #read config.toml
-        import tomllib
+        try:
+            import tomllib  # Python 3.11+
+        except ImportError:
+            import tomli as tomllib  # Fallback for Python < 3.11
         with open("config.toml","rb") as f:
             config = tomllib.load(f)
         
