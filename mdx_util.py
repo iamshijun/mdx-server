@@ -40,15 +40,28 @@ def get_definition_mdx(word, builder:IndexBuilder):
     
     str_content = ""
     if len(content) > 0:
-        for c in content:
+        for i, c in enumerate(content):           
             process_content = c.replace("\r\n","").replace("entry:/","")
+            process_content = re.sub(r"<link[^<]*>","", process_content) #去掉link
+            process_content = re.sub(r"<header[^<]*>","", process_content) 
+            process_content = re.sub(r"<meta[^<]*>","", process_content) 
+
             process_content = re.sub(r"<rt[^>]*>[^<]*</rt>","", process_content) #去掉<ruby>标签下的 <rt> 注音或注释
             process_content = re.sub(r"<wari[^>]*>[^<]*</wari>","", process_content)#wari 是小学馆的注音方式
             process_content = re.sub(r'<span data-name="ルビ">.*?</span>',"", process_content)  #还有放在 自定义的样式里的
+            
+            process_content = re.sub(r'<img[^>]*triangle[^>]*>','▼',process_content)
             process_content = re.sub(r'<img[^>]*/?>',"", process_content) #去掉img　标签
-            process_content = re.sub(r"<HeaderTitle>[^<]*</HeaderTitle>","", process_content) 
             process_content = re.sub(r'<img[^>]*?alt="([^"]+)".*?/?>',r"\1",process_content)  # 将图片中的alt 提出来 替换掉img
+
+            process_content = re.sub(r"<HeaderTitle>[^<]*</HeaderTitle>","", process_content) 
             process_content = re.sub("<entry-index[^>]*>.*</entry-index>","", process_content,1,re.DOTALL)
+            
+            #加一层div 让前端在多个content的时候 也更好的控制
+            process_content = "<div class='item'>" + process_content
+            if i < len(content) - 1:
+                process_content += "<hr color='#dedede' class='item-spliter'/>"
+            process_content += "</div>"
             str_content += process_content
 
     injection = []

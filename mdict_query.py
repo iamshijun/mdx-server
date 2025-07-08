@@ -292,7 +292,8 @@ class IndexBuilder(object):
 
     def mdx_lookup(self, keyword):
         conn = sqlite3.connect(self._mdx_db)
-        cursor = conn.execute("SELECT * FROM MDX_INDEX WHERE key_text = " + "\"" + keyword + "\"")
+        #keyword.replace("*","%") fuzzy
+        cursor = conn.execute("SELECT * FROM MDX_INDEX WHERE key_text = ?",(keyword,)) #精确查找
         lookup_result_list = []
         mdx_file = open(self._mdx_file,'rb')
         for result in cursor:
@@ -313,7 +314,8 @@ class IndexBuilder(object):
         if not os.path.isfile(self._mdd_db):
             return
         conn = sqlite3.connect(self._mdd_db)
-        cursor = conn.execute("SELECT * FROM MDX_INDEX WHERE key_text = " + "\"" + keyword + "\"")
+        #keyword.replace("*","%") fuzzy
+        cursor = conn.execute("SELECT * FROM MDX_INDEX WHERE key_text = ?",(keyword,)) #精确查找
         lookup_result_list = []
         mdd_file = open(self._mdd_file,'rb')
         for result in cursor:

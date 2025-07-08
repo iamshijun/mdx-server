@@ -135,19 +135,29 @@ def _get_common_style():
      # fixme 暂时 先这样写死 
     # 给 meaning，exg style给 "小学館デジタル大辞泉"的 ,exmaple标签在 明鏡国語辞典
     return """<style>
+        hr.item-spliter {
+            margin: 14px;
+            height: 1px;
+            border: none;
+        }
         span[data-name="用例"],
         span[data-name="語義"], 
         span[data-name="語義G"], 
         span[data-name="解説部"],
+        span[data-name="副義"],
         span[data-name="準大語義num"],
         example {
             display: block;
-        }        
+        }  
+        example spellout{
+            font-weight: bold;
+        }      
         .example {
             padding: 0 7px;
         }
         meaning ,exg, maccentaudiog {
             display: block;
+            margin: 5px 0;
         }
         .meaning , span[data-name="用例"]{
             margin: 7px 0;
@@ -191,7 +201,66 @@ def _get_common_style():
         }
         fbox {
             margin: 0 10px;
-        }     
+        }
+        /*三省堂*/
+        span[data-name="アクセント"] {
+            font-size: 0.7em;
+            vertical-align: top;
+        }
+        
+        /*明镜*/
+        dic-item column  {
+            display: block;
+            margin-top: 0.5em;
+            padding: 0 0.5em;
+            border-left: solid 5px #FFDDDD;
+            border-right: solid 5px #FFDDDD;
+        }
+        dic-item meaning.columntitle {
+            margin-bottom: 0.5em;
+            padding: 0.25em 0.25em;
+            font-family: "Hiragino Kaku Gothic ProN";
+            font-weight: bold;
+            color: #CC3333;
+            border: solid 1px #CC3333;
+        }
+        dic-item meaning fbox {
+            margin-right: 0.25em;
+            padding: 0.1em;
+            font-family: "Hiragino Kaku Gothic ProN";
+            font-size: 0.8em;
+            font-weight: normal;
+            border-style: solid;
+            border-width: 0.05em;
+            border-color: #000000;
+            border-radius: 0.2em;
+            word-break: keep-all;
+        }
+        
+        red {
+            color:#FF3333;
+        }
+        div.shikiri {
+            background-color: #FFCCCC;
+        }
+        div.shikiri td.red {
+           background-color: #FF3333;
+        }
+        div.shikiri td.red red{
+           color: #FFFFFF;
+        }
+        fbox.書き方 {
+            color: #FFFFFF;
+            background-color: #CC3333;
+            border-color: #CC3333;
+            font-size: 0.8em;
+        }
+
+        fbox.使い方 {
+            background-color: #FFCCCC;
+            border-color: #FF3333;
+            font-size: 0.8em;
+        }
     </style>"""
 
 # 新线程执行的代码
@@ -217,15 +286,16 @@ if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("filenames", nargs='*', help="mdx file name")
+    parser.add_argument("--config", type=str, default="config.toml", help="config file")
     args = parser.parse_args() 
 
     dicts:list[MyDict] = []
-    if len(args.filenames) < 1: #read config.toml
+    if len(args.filenames) < 1: #read config file
         try:
             import tomllib  # Python 3.11+
         except ImportError:
             import tomli as tomllib  # Fallback for Python < 3.11
-        with open("config.toml","rb") as f:
+        with open(args.config,"rb") as f:
             config = tomllib.load(f)
         
         dict_configs = config["dicts"]
